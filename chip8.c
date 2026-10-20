@@ -72,3 +72,27 @@ void initialize(chip8 *self){
     self -> delay_timer = 0;
     self -> sound_timer = 0;
 }
+
+int loadProgramm(chip8 *self ,const char *filename){
+    FILE* programm = fopen(filename, "rb");
+    if (!programm){
+        perror("Couldnt open programm file");
+        return 0;
+    }
+
+    fseek(programm, 0L, SEEK_END);
+
+    long int buffer_size = ftell(programm);
+
+    if(buffer_size > sizeof self->memory - 0x200){
+        perror("Programm is to big to load into memory");
+        return 0;
+    }
+
+    rewind(programm);
+
+    fread(self->memory + 0x200,buffer_size,1,programm);
+
+    fclose(programm);
+    return 1;
+}
