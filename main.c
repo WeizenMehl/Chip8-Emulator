@@ -54,25 +54,25 @@ unsigned short sp;
 unsigned char key[16];
 
 
-void initialize(chip8 *self){
-    self -> pc = 0x200;
-    self -> opcode = 0;
-    self -> I = 0;
-    self -> sp = 0;
+void initialize(){
+     pc = 0x200;
+     opcode = 0;
+     I = 0;
+     sp = 0;
 
-    for(size_t i = 0; i < sizeof self -> gfx;i++) self -> gfx[i] = 0;
-    for(size_t i = 0; i < sizeof self -> stack;i++) self -> stack[i] = 0;
-    for(size_t i = 0; i < sizeof self -> V;i++) self -> V[i] = 0;
-    for(size_t i = 0; i < sizeof self -> memory;i++) self -> memory[i] = 0;
+    for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
+    for(size_t i = 0; i < sizeof  stack;i++)  stack[i] = 0;
+    for(size_t i = 0; i < sizeof  V;i++)  V[i] = 0;
+    for(size_t i = 0; i < sizeof  memory;i++)  memory[i] = 0;
 
     for(int i = 0; i < 80; ++i)
-        self -> memory[i] = chip8_fontset[i];	
+         memory[i] = chip8_fontset[i];	
 
-    self -> delay_timer = 0;
-    self -> sound_timer = 0;
+     delay_timer = 0;
+     sound_timer = 0;
 }
 
-int loadProgramm(chip8 *self ,const char *filename){
+int loadProgramm(const char *filename){
     FILE* programm = fopen(filename, "rb");
     if (!programm){
         perror("Couldnt open programm file");
@@ -103,7 +103,7 @@ void emulateCycle(){
         case 0x0000:
             switch(opcode & 0x000F){
                 case 0x0000:
-                    for(size_t i = 0; i < sizeof self -> gfx;i++) self -> gfx[i] = 0;
+                    for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
                 break;
                 case 0x000E:
                     pc = stack[sp]; //this probably isnt correct
