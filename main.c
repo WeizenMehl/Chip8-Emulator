@@ -104,10 +104,11 @@ void emulateCycle(){
             switch(opcode & 0x000F){
                 case 0x0000:
                     for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
+                    pc + 2;
                 break;
                 case 0x000E:
                     pc = stack[sp]; //this probably isnt correct
-                break;
+                    pc +2;
                 break;
             }
         break;
@@ -120,6 +121,45 @@ void emulateCycle(){
             stack[sp] = pc;
             ++pc;
             pc = opcode & 0x0FFF;
+        break;
+
+        case 0x3000:
+            if(V[opcode & 0x0F00] == (opcode & 0x00FF)){
+                pc + 4;
+            }
+            else{pc +2;}
+        break;
+
+        case 0x4000:
+            if(V[opcode & 0x0F00] != (opcode & 0x00FF)){
+                pc + 4;
+            }
+            else{pc+2;}
+        break;
+
+        case 0x5000:
+            if(V[opcode & 0x0F00] == V[opcode & 0x00F0]){
+                pc +4;
+            }
+            else{pc+2;}
+        break;
+
+        case 0x6000:
+            V[opcode & 0x0F00] = opcode & 0x00FF;
+            pc +2;
+        break;
+
+        case 0x7000:
+            V[opcode & 0x0F00] += opcode & 0x00FF;
+            pc +2;
+        break;
+
+        case 0x8000:
+            switch(opcode & 0x000F){
+                case 0x0000:
+                    V[opcode & 0x0F00] = V[opcode & 0x00F0];
+                break;
+            }
         break;
     }
 }
