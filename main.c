@@ -99,6 +99,10 @@ int loadProgramm(const char *filename){
 void emulateCycle(){
     opcode = memory[pc] << 8 | memory[pc+1];
 
+    decodeOpcode();
+}
+
+void decodeOpcode(){
     switch(opcode & 0xF000){
         case 0x0000:
             switch(opcode & 0x000F){
@@ -124,42 +128,112 @@ void emulateCycle(){
         break;
 
         case 0x3000:
-            if(V[opcode & 0x0F00] == (opcode & 0x00FF)){
+            if(V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)){
                 pc + 4;
             }
             else{pc +2;}
         break;
 
         case 0x4000:
-            if(V[opcode & 0x0F00] != (opcode & 0x00FF)){
+            if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)){
                 pc + 4;
             }
             else{pc+2;}
         break;
 
         case 0x5000:
-            if(V[opcode & 0x0F00] == V[opcode & 0x00F0]){
+            if(V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]){
                 pc +4;
             }
             else{pc+2;}
         break;
 
         case 0x6000:
-            V[opcode & 0x0F00] = opcode & 0x00FF;
+            V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
             pc +2;
         break;
 
         case 0x7000:
-            V[opcode & 0x0F00] += opcode & 0x00FF;
+            V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
             pc +2;
         break;
 
         case 0x8000:
             switch(opcode & 0x000F){
                 case 0x0000:
-                    V[opcode & 0x0F00] = V[opcode & 0x00F0];
+                    V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+                    pc +2;
+                break;
+
+                case 0x0001:
+                    V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
+                    pc +2;
+                break;
+
+                case 0x0002:
+                    V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
+                    pc +2;
+                break;
+
+                case 0x0003:
+                    V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
+                    pc +2;
+                break;
+
+                case 0x0004:
+                    if(V[(opcode & 0x00F0) >> 4] > (0xFF - V[(opcode & 0x0F00) >> 8])){
+                        V[0xF] = 1;
+                    }
+                    else{
+                        V[0xF] = 0;
+                    }
+                    V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
+                    pc += 2;          
+                break;
+
+                case 0x0005:
+                    if(V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8]){
+                        V[0xF] = 0;
+                    }
+                    else{
+                        V[0xF] = 1;
+                    }
+                    V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
+                    pc +2;
+                break;
+
+                case 0x0006:
+                    V[(opcode & 0x00F0) >> 4] = V[(opcode & 0x0F00) >> 8] & 0x0001; // this is probably wrong
+                    V[(opcode & 0x0F00) >> 8] >>=1;
+                    pc +2;
+                break;
+
+                case 0x0007:
+                    if(V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]){
+                        V[0xF] = 0;
+                    }
+                    else{
+                        V[0xF] = 1;
+                    }
+                    V[(opcode & 0x0F00) >> 8] - V[(opcode & 0x00F0) >> 4];
+                    pc +2;
+                break;
+
+                case 0x000E:
+                    V[(opcode & 0x00F0) >> 4] = V[(opcode & 0x0F00) >> 8] & 0x1000; // this is probably wrong
+                    V[(opcode & 0x0F00) >> 8] <<=1;
+                    pc +2;
                 break;
             }
+
+            case 0x9000:
+                if(V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]){
+                    pc+4;
+                }
+                else{
+                    pc+2;
+                }
+            break;
         break;
     }
 }
