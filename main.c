@@ -1,4 +1,5 @@
 # include <stdio.h>
+# include <stdlib.h>
 
 unsigned char chip8_fontset[80] =
 { 
@@ -233,6 +234,24 @@ void decodeOpcode(){
                 else{
                     pc+2;
                 }
+            break;
+
+            case 0xA000:
+                I = opcode & 0x0FFF;
+                pc +2;
+            break;
+
+            case 0xB000:
+                pc = (opcode & 0x0FFF) + V[0x0];
+            break;
+
+            case 0xC000:
+                V[(opcode & 0x0F00) >> 8] = rand() & (opcode & 0x00FF);
+                pc +2;
+            break;
+
+            case 0xD000:
+                // Draws pixels will implement in the future
             break;
         break;
     }
