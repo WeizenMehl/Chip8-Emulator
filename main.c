@@ -235,58 +235,59 @@ void decodeOpcode(){
                 break;
             }
 
-            case 0x9000:
-                if(V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]){
-                    pc+4;
-                }
-                else{
-                    pc+2;
-                }
-            break;
-
-            case 0xA000:
-                I = opcode & 0x0FFF;
-                pc +2;
-            break;
-
-            case 0xB000:
-                pc = (opcode & 0x0FFF) + V[0x0];
-            break;
-
-            case 0xC000:
-                V[(opcode & 0x0F00) >> 8] = rand() & (opcode & 0x00FF);
-                pc +2;
-            break;
-
-            case 0xD000:
-                unsigned short x = V[(opcode & 0x0F00) >> 8];
-                unsigned short y = V[(opcode & 0x00F0) >> 4];
-                unsigned short z = V[opcode & 0x000F];
-
-                DrawOnDisplay(x,y,z);
+        case 0x9000:
+            if(V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]){
+                pc+4;
+            }
+            else{
                 pc+2;
-            break;
+            }
+        break;
 
-            case 0xE000:
-                switch(opcode & 0x00F){
-                    case 0x000E:
-                        if(key[V[(opcode & 0x0F00)>>8]] != 0){
-                            pc +4;
-                        }
-                        else{
-                            pc+2;
-                        }
-                    break;
+        case 0xA000:
+            I = opcode & 0x0FFF;
+            pc +2;
+        break;
 
-                    case 0x0001:
-                        if(key[V[(opcode & 0x0F00)>>8]] == 0){
-                            pc +4;
-                        }
-                        else{
-                            pc+2;
-                        }
-                    break;
-                }
+        case 0xB000:
+            pc = (opcode & 0x0FFF) + V[0x0];
+        break;
+
+        case 0xC000:
+            V[(opcode & 0x0F00) >> 8] = rand() & (opcode & 0x00FF);
+            pc +2;
+        break;
+
+        case 0xD000:
+            unsigned short x = V[(opcode & 0x0F00) >> 8];
+            unsigned short y = V[(opcode & 0x00F0) >> 4];
+                
+            unsigned short z = V[opcode & 0x000F];
+
+            DrawOnDisplay(x,y,z);
+            pc+2;
+        break;
+
+        case 0xE000:
+            switch(opcode & 0x00F){
+                case 0x000E:
+                    if(key[V[(opcode & 0x0F00)>>8]] != 0){
+                        pc +4;
+                    }
+                    else{
+                        pc+2;
+                    }
+                break;
+
+                case 0x0001:
+                    if(key[V[(opcode & 0x0F00)>>8]] == 0){
+                        pc +4;
+                    }
+                    else{
+                        pc+2;
+                    }
+                break;
+            }
         break;
     }
 }
