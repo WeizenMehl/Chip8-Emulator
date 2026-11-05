@@ -1,5 +1,8 @@
 # include <stdio.h>
 # include <stdlib.h>
+# include <SDL2/SDL.h>
+# define WINDOW_WIDTH 64
+# define WINDOW_HEIGHT 34
 
 unsigned char chip8_fontset[80] =
 { 
@@ -37,7 +40,7 @@ unsigned short I;
 unsigned short pc;
 
 // to represent the graphics of the Chip8
-unsigned char gfx[64 * 32];
+unsigned char gfx[WINDOW_WIDTH * WINDOW_HEIGHT];
 
 // eventho the Chip8 has no interups or hardware registers it
 // has two timer registers that count at 60Hz
@@ -55,12 +58,17 @@ unsigned short sp;
 unsigned char key[16];
 
 
+SDL_Renderer *renderer;
+SDL_Window *window;
+
+
 void initialize(){
      pc = 0x200;
      opcode = 0;
      I = 0;
      sp = 0;
 
+    SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer);
     for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
     for(size_t i = 0; i < sizeof  stack;i++)  stack[i] = 0;
     for(size_t i = 0; i < sizeof  V;i++)  V[i] = 0;
@@ -251,8 +259,66 @@ void decodeOpcode(){
             break;
 
             case 0xD000:
-                // Draws pixels will implement in the future
+                unsigned short x = V[(opcode & 0x0F00) >> 8];
+                unsigned short y = V[(opcode & 0x00F0) >> 4];
+                unsigned short z = V[opcode & 0x000F];
+
+                DrawOnDisplay(x,y,z);
+                pc+2;
             break;
+
+            case 0xE000:
+                switch(opcode & 0x00F){
+                    case 0x000E:
+                        if(key[V[(opcode & 0x0F00)>>8]] != 0){
+                            pc +4;
+                        }
+                        else{
+                            pc+2;
+                        }
+                    break;
+
+                    case 0x0001:
+                        if(key[V[(opcode & 0x0F00)>>8]] == 0){
+                            pc +4;
+                        }
+                        else{
+                            pc+2;
+                        }
+                    break;
+                }
         break;
     }
+}
+//have to figure out better name for this function
+void DrawOnDisplay(unsigned short x,unsigned short y,unsigned short z){
+    unsigned short pixel;
+    V[0xF] = 0;
+    for(int row = 0;row++;row <= z){
+        pixel = memory[I + row];
+        for(int column = 0;column++;column <= 8){
+            if(((pixel & 0x80)>>row) != 0){
+                if(gfx[(x + column + y + row) * 64] == 1){
+                    V[0xF] = 1;
+                }
+            }
+        }
+    }
+    updateDisplay();
+}
+
+void updateDisplay(){
+    for(int row = 0;row++;row<=WINDOW_WIDTH){
+        for(int column = 0;column++;column<=WINDOW_HEIGHT){
+            if(gfx[row,column] == 1){
+                SLD_RenderDrawColor(renderer,255,255,255);
+                SDL_RenderDrawPoint(renderer, row, column);    
+            }
+            else{
+                SLD_RenderDrawColor(renderer,0,0,0);
+                SDL_RenderDrawPoint(renderer, row, column); 
+            }
+        }
+    }
+    SDL_RenderPresent(renderer);
 }
