@@ -68,7 +68,6 @@ void initialize(){
      I = 0;
      sp = 0;
 
-    SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer);
     for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
     for(size_t i = 0; i < sizeof  stack;i++)  stack[i] = 0;
     for(size_t i = 0; i < sizeof  V;i++)  V[i] = 0;
@@ -117,6 +116,7 @@ void decodeOpcode(){
             switch(opcode & 0x000F){
                 case 0x0000:
                     for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
+                    updateDisplay();
                     pc + 2;
                 break;
                 case 0x000E:
@@ -289,6 +289,19 @@ void decodeOpcode(){
                 break;
             }
         break;
+
+        case 0xF000:
+            switch(opcode & 0x00FF){
+                case 0x0007:
+                    V[(opcode & 0x0F00) >> 8] = delay_timer;
+                    pc+2;
+                break;
+                
+                case 0x000A:
+
+                break;
+            }
+        break;
     }
 }
 //have to figure out better name for this function
@@ -322,4 +335,20 @@ void updateDisplay(){
         }
     }
     SDL_RenderPresent(renderer);
+}
+
+void getUserInput(){
+
+}
+
+int main(){
+    SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer);
+
+    initialize();
+
+    for(;;){
+        emulateCycle();
+    }
+
+    return 0;
 }
