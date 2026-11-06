@@ -111,6 +111,8 @@ void emulateCycle(){
 }
 
 void decodeOpcode(){
+    unsigned int x = (opcode & 0x0F00)>>8;
+    unsigned int y = (opcode & 0x00F0)>>4;
     switch(opcode & 0xF000){
         case 0x0000:
             switch(opcode & 0x000F){
@@ -137,106 +139,106 @@ void decodeOpcode(){
         break;
 
         case 0x3000:
-            if(V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)){
+            if(V[x] == (opcode & 0x00FF)){
                 pc + 4;
             }
             else{pc +2;}
         break;
 
         case 0x4000:
-            if(V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)){
+            if(V[x] != (opcode & 0x00FF)){
                 pc + 4;
             }
             else{pc+2;}
         break;
 
         case 0x5000:
-            if(V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]){
+            if(V[x] == V[y]){
                 pc +4;
             }
             else{pc+2;}
         break;
 
         case 0x6000:
-            V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+            V[x] = opcode & 0x00FF;
             pc +2;
         break;
 
         case 0x7000:
-            V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+            V[x] += opcode & 0x00FF;
             pc +2;
         break;
 
         case 0x8000:
             switch(opcode & 0x000F){
                 case 0x0000:
-                    V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+                    V[x] = V[y];
                     pc +2;
                 break;
 
                 case 0x0001:
-                    V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
+                    V[x] |= V[y];
                     pc +2;
                 break;
 
                 case 0x0002:
-                    V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
+                    V[x] &= V[y];
                     pc +2;
                 break;
 
                 case 0x0003:
-                    V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
+                    V[x] ^= V[y];
                     pc +2;
                 break;
 
                 case 0x0004:
-                    if(V[(opcode & 0x00F0) >> 4] > (0xFF - V[(opcode & 0x0F00) >> 8])){
+                    if(V[y] > (0xFF - V[x])){
                         V[0xF] = 1;
                     }
                     else{
                         V[0xF] = 0;
                     }
-                    V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
+                    V[x] += V[y];
                     pc += 2;          
                 break;
 
                 case 0x0005:
-                    if(V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8]){
+                    if(V[y] > V[x]){
                         V[0xF] = 0;
                     }
                     else{
                         V[0xF] = 1;
                     }
-                    V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
+                    V[x] -= V[y];
                     pc +2;
                 break;
 
                 case 0x0006:
-                    V[(opcode & 0x00F0) >> 4] = V[(opcode & 0x0F00) >> 8] & 0x0001; // this is probably wrong
-                    V[(opcode & 0x0F00) >> 8] >>=1;
+                    V[y] = V[x] & 0x0001; // this is probably wrong
+                    V[x] >>=1;
                     pc +2;
                 break;
 
                 case 0x0007:
-                    if(V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]){
+                    if(V[x] > V[y]){
                         V[0xF] = 0;
                     }
                     else{
                         V[0xF] = 1;
                     }
-                    V[(opcode & 0x0F00) >> 8] - V[(opcode & 0x00F0) >> 4];
+                    V[x] - V[y];
                     pc +2;
                 break;
 
                 case 0x000E:
-                    V[(opcode & 0x00F0) >> 4] = V[(opcode & 0x0F00) >> 8] & 0x1000; // this is probably wrong
-                    V[(opcode & 0x0F00) >> 8] <<=1;
+                    V[y] = V[x] & 0x1000; // this is probably wrong
+                    V[x] <<=1;
                     pc +2;
                 break;
             }
 
         case 0x9000:
-            if(V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]){
+            if(V[x] != V[y]){
                 pc+4;
             }
             else{
@@ -254,14 +256,11 @@ void decodeOpcode(){
         break;
 
         case 0xC000:
-            V[(opcode & 0x0F00) >> 8] = rand() & (opcode & 0x00FF);
+            V[x] = rand() & (opcode & 0x00FF);
             pc +2;
         break;
 
-        case 0xD000:
-            unsigned short x = V[(opcode & 0x0F00) >> 8];
-            unsigned short y = V[(opcode & 0x00F0) >> 4];
-                
+        case 0xD000:                
             unsigned short z = V[opcode & 0x000F];
 
             DrawOnDisplay(x,y,z);
@@ -293,12 +292,49 @@ void decodeOpcode(){
         case 0xF000:
             switch(opcode & 0x00FF){
                 case 0x0007:
-                    V[(opcode & 0x0F00) >> 8] = delay_timer;
+                    V[x] = delay_timer;
                     pc+2;
                 break;
                 
                 case 0x000A:
+                    // will implement later
+                break;
 
+                case 0x0015:
+                    delay_timer = V[(opcode & 0x0F00)>>8];
+                    pc+2;
+                break;
+
+                case 0x0018:
+                    sound_timer = V[(opcode & 0x0F00)>>8];
+                    pc+2;
+                break;
+
+                case 0x001E:
+                    I += V[(opcode & 0x0F00)>>8];
+                break;
+
+                case 0x0029:
+                    I = V[(opcode & 0x0F00)>>8] * 5; //was autocompleted
+                break;
+
+                case 0x0033:
+                    unsigned short x = (opcode & 0x0F00);
+                    memory[I] = x/100;
+                    memory[I+1] = (x)/10%10;
+                    memory[I+2] = x%10;
+                break;
+
+                case 0x0055:
+                    for(int i = 0;i<=x;i++){
+                        memory[I+i] = V[i]; 
+                    }
+                break;
+
+                case 0x0065:
+                    for(int i = 0;i<=x;i++){
+                        V[i] = memory[I+1]; 
+                    }
                 break;
             }
         break;
@@ -322,8 +358,8 @@ void DrawOnDisplay(unsigned short x,unsigned short y,unsigned short z){
 }
 
 void updateDisplay(){
-    for(int row = 0;row++;row<=WINDOW_WIDTH){
-        for(int column = 0;column++;column<=WINDOW_HEIGHT){
+    for(int row = 0;row<=WINDOW_WIDTH;row++){
+        for(int column = 0;column<=WINDOW_HEIGHT;column++){
             if(gfx[row,column] == 1){
                 SLD_RenderDrawColor(renderer,255,255,255);
                 SDL_RenderDrawPoint(renderer, row, column);    
