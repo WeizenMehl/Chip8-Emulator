@@ -1,5 +1,6 @@
 # include <stdio.h>
 # include <stdlib.h>
+# include <time.h>
 # include <SDL2/SDL.h>
 # define WINDOW_WIDTH 64
 # define WINDOW_HEIGHT 34
@@ -379,11 +380,26 @@ void getUserInput(){
 
 int main(){
     SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer);
+    struct timespec start, now;
 
     initialize();
 
+    clock_gettime(CLOCK_MONOTONIC,&start);
+
     for(;;){
-        emulateCycle();
+        clock_gettime(CLOCK_MONOTONIC,&now);
+
+        double elapsed = (start.tv_nsec - now.tv_nsec)/ 1e9;
+
+        if(elapsed >= 1/60){
+            emulateCycle();
+
+            if(delay_timer > 0) delay_timer--;
+            if(sound_timer > 0){
+                sound_timer--;
+                // make sound
+            }
+        }
     }
 
     return 0;
