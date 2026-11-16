@@ -298,7 +298,7 @@ void decodeOpcode(){
                 break;
                 
                 case 0x000A:
-                    // will implement later
+                    // TODO
                 break;
 
                 case 0x0015:
