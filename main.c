@@ -109,6 +109,11 @@ void emulateCycle(){
     opcode = memory[pc] << 8 | memory[pc+1];
 
     decodeOpcode();
+
+    if(delay_timer > 0) delay_timer--;
+    if(sound_timer > 0){
+         sound_timer--;
+    }
 }
 
 void decodeOpcode(){
@@ -298,7 +303,13 @@ void decodeOpcode(){
                 break;
                 
                 case 0x000A:
-                    // TODO
+                    //This is wrong and I need to modify this further
+                    for(int i;i<=16;i++){
+                        if(key[i] != 0){
+                            V[x] = key[i];
+                            pc+2;
+                        }
+                    }
                 break;
 
                 case 0x0015:
@@ -375,7 +386,86 @@ void updateDisplay(){
 }
 
 void getUserInput(){
+    char c;
+    if(kbhit()){
+        c = getch();
+        keyPressed(c);
 
+    }
+    else{
+        for(int i;i<=16;i++){
+            if (key[i] == 1)
+                key[i] == 0;
+        }
+    }
+}
+
+void keyPressed(char c){
+    switch(c){
+        case '1':
+            key[0x1] = 1;
+        break;
+
+        case '2':
+            key[0x2] = 1;
+        break;
+
+        case '3':
+            key[0x3] = 1;
+        break;
+
+        case '4':
+            key[0xC] = 1;
+        break;
+
+        case 'q':
+            key[0x4] = 1;
+        break;
+
+        case 'w':
+            key[0x5] = 1;
+        break;
+
+        case 'e':
+            key[0x6] = 1;
+        break;
+
+        case 'r':
+            key[0xD] = 1;
+        break;
+
+        case 'a':
+            key[0x7] = 1;
+        break;
+
+        case 's':
+            key[0x8] = 1;
+        break;
+
+        case 'd':
+            key[0x9] = 1;
+        break;
+
+        case 'f':
+            key[0xE] = 1;
+        break;
+
+        case 'z':
+            key[0xA] = 1;
+        break;
+
+        case 'x':
+            key[0x0] = 1;
+        break;
+
+        case 'c':
+            key[0xB] = 1;
+        break;
+
+        case 'v':
+            key[0xF] = 1;
+        break;
+    }
 }
 
 int main(){
@@ -393,13 +483,9 @@ int main(){
 
         if(elapsed >= 1/60){
             emulateCycle();
-
-            if(delay_timer > 0) delay_timer--;
-            if(sound_timer > 0){
-                sound_timer--;
-
-            }
         }
+
+        getUserInput();
     }
 
     return 0;
