@@ -60,6 +60,8 @@ unsigned short sp;
 unsigned char key[16];
 
 
+bool updateDisplayFlag = false;
+
 SDL_Renderer *renderer;
 SDL_Window *window;
 
@@ -114,29 +116,27 @@ int loadProgramm(const char *filename){
 
 void emulateCycle(){
     opcode = memory[pc] << 8 | memory[pc+1];
+    pc+2;
 
     decodeOpcode();
-
-    if(delay_timer > 0) delay_timer--;
-    if(sound_timer > 0){
-         sound_timer--;
-    }
 }
 
 void decodeOpcode(){
     unsigned int x = (opcode & 0x0F00)>>8;
     unsigned int y = (opcode & 0x00F0)>>4;
+    printf("PC: 0x%03X | OPCODE: 0x%04X\n", pc, opcode);
     switch(opcode & 0xF000){
         case 0x0000:
             switch(opcode & 0x000F){
                 case 0x0000:
                     for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
-                    updateDisplay();
+                    updateDisplayFlag = true;
                     pc  += 2;
                 break;
                 case 0x000E:
+                    sp--;
                     pc = stack[sp]; //this probably isnt correct
-                    pc  +=2;
+                    pc+=2;
                 break;
             }
         break;
@@ -147,7 +147,7 @@ void decodeOpcode(){
 
         case 0x2000:
             stack[sp] = pc;
-            ++pc;
+            sp++;
             pc = opcode & 0x0FFF;
         break;
 
@@ -276,7 +276,7 @@ void decodeOpcode(){
         case 0xD000:                
             unsigned short z = V[opcode & 0x000F];
 
-            DrawOnDisplay(x * 10,y* 10,z * 10);
+            DrawOnDisplay(x,y,z);
             pc += 2;
         break;
 
@@ -320,22 +320,22 @@ void decodeOpcode(){
                 break;
 
                 case 0x0015:
-                    delay_timer = V[(opcode & 0x0F00)>>8];
+                    delay_timer = V[x];
                     pc +=2;
                 break;
 
                 case 0x0018:
-                    sound_timer = V[(opcode & 0x0F00)>>8];
+                    sound_timer = V[x];
                     pc +=2;
                 break;
 
                 case 0x001E:
-                    I += V[(opcode & 0x0F00)>>8];
+                    I += V[x];
                     pc+=2;
                 break;
 
                 case 0x0029:
-                    I = V[(opcode & 0x0F00)>>8] * 5; //was autocompleted
+                    I = V[x] * 5; //was autocompleted
                     pc+=2;
                 break;
 
@@ -368,22 +368,26 @@ void decodeOpcode(){
 void DrawOnDisplay(unsigned short x,unsigned short y,unsigned short z){
     unsigned short pixel;
     V[0xF] = 0;
-    for(int row = 0;row++;row <= z){
+    for(int row = 0;row <= z;row++){
         pixel = memory[I + row];
-        for(int column = 0;column++;column <= 8){
+        for(int column = 0;column <= 8;column++){
             if(((pixel & 0x80)>>row) != 0){
-                if(gfx[(x + column + y + row) * WINDOW_WIDTH* 10] == 1){
+                if(gfx[(x + column + y + row) * WINDOW_WIDTH] == 1){
                     V[0xF] = 1;
+                    gfx[(x + column + y + row) * WINDOW_WIDTH] = 0;
+                }
+                else{
+                    gfx[(x + column + y + row) * WINDOW_WIDTH] = 1;
                 }
             }
         }
     }
-    updateDisplay();
+    updateDisplayFlag = true;
 }
 
 void updateDisplay(){
-    for(int row = 0;row<=WINDOW_WIDTH * 10;row++){
-        for(int column = 0;column<=WINDOW_HEIGHT * 10;column++){
+    for(int row = 0;row<=WINDOW_WIDTH;row++){
+        for(int column = 0;column<=WINDOW_HEIGHT;column++){
             if(gfx[row,column] == 1){
                 SDL_SetRenderDrawColor(renderer,255,255,255,255);
                 SDL_RenderDrawPoint(renderer, row, column);    
@@ -395,6 +399,7 @@ void updateDisplay(){
         }
     }
     SDL_RenderPresent(renderer);
+    updateDisplayFlag = false;
 }
 
 void getUserInput(){
@@ -448,9 +453,17 @@ int main(){
 
         double elapsed = (start.tv_nsec - now.tv_nsec)/ 1e9;
 
-        if(elapsed >= 1/60){
+        if(elapsed >= 1/500){
             emulateCycle();
         }
+
+        if(delay_timer > 0 && elapsed >= 1/60) delay_timer--;
+        if(sound_timer > 0 && elapsed >= 1/60){
+            // gonna need to implement beep
+            sound_timer--;
+        }
+
+        if(updateDisplayFlag){ updateDisplay();}
 
         getUserInput();
     }
