@@ -132,11 +132,11 @@ void decodeOpcode(){
                 case 0x0000:
                     for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
                     updateDisplay();
-                    pc + 2;
+                    pc  += 2;
                 break;
                 case 0x000E:
                     pc = stack[sp]; //this probably isnt correct
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
             }
         break;
@@ -153,55 +153,55 @@ void decodeOpcode(){
 
         case 0x3000:
             if(V[x] == (opcode & 0x00FF)){
-                pc + 4;
+                pc  += 4;
             }
-            else{pc  = pc +2;}
+            else{pc  +=2;}
         break;
 
         case 0x4000:
             if(V[x] != (opcode & 0x00FF)){
-                pc + 4;
+                pc  += 4;
             }
-            else{pc = pc +2;}
+            else{pc +=2;}
         break;
 
         case 0x5000:
             if(V[x] == V[y]){
-                pc +4;
+                pc  +=4;
             }
-            else{pc = pc +2;}
+            else{pc +=2;}
         break;
 
         case 0x6000:
             V[x] = opcode & 0x00FF;
-            pc  = pc +2;
+            pc  +=2;
         break;
 
         case 0x7000:
             V[x] += opcode & 0x00FF;
-            pc  = pc +2;
+            pc  +=2;
         break;
 
         case 0x8000:
             switch(opcode & 0x000F){
                 case 0x0000:
                     V[x] = V[y];
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
 
                 case 0x0001:
                     V[x] |= V[y];
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
 
                 case 0x0002:
                     V[x] &= V[y];
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
 
                 case 0x0003:
                     V[x] ^= V[y];
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
 
                 case 0x0004:
@@ -223,13 +223,13 @@ void decodeOpcode(){
                         V[0xF] = 1;
                     }
                     V[x] -= V[y];
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
 
                 case 0x0006:
                     V[0xF] = V[x] & 0x0001; // this is probably wrong
                     V[x] >>=1;
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
 
                 case 0x0007:
@@ -240,28 +240,28 @@ void decodeOpcode(){
                         V[0xF] = 1;
                     }
                     V[x] - V[y];
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
 
                 case 0x000E:
                     V[0xF] = V[x] & 0x80;
                     V[x] <<=1;
-                    pc  = pc +2;
+                    pc  +=2;
                 break;
             }
 
         case 0x9000:
             if(V[x] != V[y]){
-                pc+4;
+                pc +=4;
             }
             else{
-                pc = pc +2;
+                pc +=2;
             }
         break;
 
         case 0xA000:
             I = opcode & 0x0FFF;
-            pc = pc +2;
+            pc +=2;
         break;
 
         case 0xB000:
@@ -270,33 +270,33 @@ void decodeOpcode(){
 
         case 0xC000:
             V[x] = rand() & (opcode & 0x00FF);
-            pc = pc +2;
+            pc += 2;
         break;
 
         case 0xD000:                
             unsigned short z = V[opcode & 0x000F];
 
             DrawOnDisplay(x,y,z);
-            pc = pc +2;
+            pc += 2;
         break;
 
         case 0xE000:
             switch(opcode & 0x00F){
                 case 0x000E:
                     if(key[V[(opcode & 0x0F00)>>8]] != false){
-                        pc +4;
+                        pc += 4;
                     }
                     else{
-                        pc = pc +2;
+                        pc += 2;
                     }
                 break;
 
                 case 0x0001:
                     if(key[V[(opcode & 0x0F00)>>8]] == false){
-                        pc +4;
+                        pc  +=4;
                     }
                     else{
-                        pc = pc +2;
+                        pc +=2;
                     }
                 break;
             }
@@ -306,7 +306,7 @@ void decodeOpcode(){
             switch(opcode & 0x00FF){
                 case 0x0007:
                     V[x] = delay_timer;
-                    pc = pc +2;
+                    pc +=2;
                 break;
                 
                 case 0x000A:
@@ -314,19 +314,19 @@ void decodeOpcode(){
                     for(int i;i<=16;i++){
                         if(key[i] != false){
                             V[x] = key[i];
-                            pc = pc +2;
+                            pc +=2;
                         }
                     }
                 break;
 
                 case 0x0015:
                     delay_timer = V[(opcode & 0x0F00)>>8];
-                    pc = pc +2;
+                    pc +=2;
                 break;
 
                 case 0x0018:
                     sound_timer = V[(opcode & 0x0F00)>>8];
-                    pc = pc +2;
+                    pc +=2;
                 break;
 
                 case 0x001E:

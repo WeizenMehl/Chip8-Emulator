@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(chip8 LANGUAGES C)
 
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
