@@ -1,9 +1,10 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <time.h>
-# include <SDL2/SDL.h>
+# include <SDL2/SDL.h> 
+# include <stdbool.h>
 # define WINDOW_WIDTH 64
-# define WINDOW_HEIGHT 34
+# define WINDOW_HEIGHT 34 
 
 unsigned char chip8_fontset[80] =
 { 
@@ -66,7 +67,7 @@ int loadProgramm(const char *filename);
 void decodeOpcode();
 void updateDisplay();
 void DrawOnDisplay(unsigned short x,unsigned short y,unsigned short z);
-void keyPressed(char);
+void keyPressed(char,bool);
 
 
 void initialize(){
@@ -135,7 +136,7 @@ void decodeOpcode(){
                 break;
                 case 0x000E:
                     pc = stack[sp]; //this probably isnt correct
-                    pc +2;
+                    pc  = pc +2;
                 break;
             }
         break;
@@ -154,53 +155,53 @@ void decodeOpcode(){
             if(V[x] == (opcode & 0x00FF)){
                 pc + 4;
             }
-            else{pc +2;}
+            else{pc  = pc +2;}
         break;
 
         case 0x4000:
             if(V[x] != (opcode & 0x00FF)){
                 pc + 4;
             }
-            else{pc+2;}
+            else{pc = pc +2;}
         break;
 
         case 0x5000:
             if(V[x] == V[y]){
                 pc +4;
             }
-            else{pc+2;}
+            else{pc = pc +2;}
         break;
 
         case 0x6000:
             V[x] = opcode & 0x00FF;
-            pc +2;
+            pc  = pc +2;
         break;
 
         case 0x7000:
             V[x] += opcode & 0x00FF;
-            pc +2;
+            pc  = pc +2;
         break;
 
         case 0x8000:
             switch(opcode & 0x000F){
                 case 0x0000:
                     V[x] = V[y];
-                    pc +2;
+                    pc  = pc +2;
                 break;
 
                 case 0x0001:
                     V[x] |= V[y];
-                    pc +2;
+                    pc  = pc +2;
                 break;
 
                 case 0x0002:
                     V[x] &= V[y];
-                    pc +2;
+                    pc  = pc +2;
                 break;
 
                 case 0x0003:
                     V[x] ^= V[y];
-                    pc +2;
+                    pc  = pc +2;
                 break;
 
                 case 0x0004:
@@ -222,13 +223,13 @@ void decodeOpcode(){
                         V[0xF] = 1;
                     }
                     V[x] -= V[y];
-                    pc +2;
+                    pc  = pc +2;
                 break;
 
                 case 0x0006:
-                    V[y] = V[x] & 0x0001; // this is probably wrong
+                    V[0xF] = V[x] & 0x0001; // this is probably wrong
                     V[x] >>=1;
-                    pc +2;
+                    pc  = pc +2;
                 break;
 
                 case 0x0007:
@@ -239,13 +240,13 @@ void decodeOpcode(){
                         V[0xF] = 1;
                     }
                     V[x] - V[y];
-                    pc +2;
+                    pc  = pc +2;
                 break;
 
                 case 0x000E:
-                    V[y] = V[x] & 0x1000; // this is probably wrong
+                    V[0xF] = V[x] & 0x80;
                     V[x] <<=1;
-                    pc +2;
+                    pc  = pc +2;
                 break;
             }
 
@@ -254,13 +255,13 @@ void decodeOpcode(){
                 pc+4;
             }
             else{
-                pc+2;
+                pc = pc +2;
             }
         break;
 
         case 0xA000:
             I = opcode & 0x0FFF;
-            pc +2;
+            pc =  pc = pc +2;
         break;
 
         case 0xB000:
@@ -269,33 +270,33 @@ void decodeOpcode(){
 
         case 0xC000:
             V[x] = rand() & (opcode & 0x00FF);
-            pc +2;
+            pc = pc  = pc +2;
         break;
 
         case 0xD000:                
             unsigned short z = V[opcode & 0x000F];
 
             DrawOnDisplay(x,y,z);
-            pc+2;
+            pc =pc  = pc +2;
         break;
 
         case 0xE000:
             switch(opcode & 0x00F){
                 case 0x000E:
-                    if(key[V[(opcode & 0x0F00)>>8]] != 0){
+                    if(key[V[(opcode & 0x0F00)>>8]] != false){
                         pc +4;
                     }
                     else{
-                        pc+2;
+                        pc = pc +2;
                     }
                 break;
 
                 case 0x0001:
-                    if(key[V[(opcode & 0x0F00)>>8]] == 0){
+                    if(key[V[(opcode & 0x0F00)>>8]] == false){
                         pc +4;
                     }
                     else{
-                        pc+2;
+                        pc = pc +2;
                     }
                 break;
             }
@@ -305,27 +306,27 @@ void decodeOpcode(){
             switch(opcode & 0x00FF){
                 case 0x0007:
                     V[x] = delay_timer;
-                    pc+2;
+                    pc = pc +2;
                 break;
                 
                 case 0x000A:
                     //This is wrong and I need to modify this further
                     for(int i;i<=16;i++){
-                        if(key[i] != 0){
+                        if(key[i] != false){
                             V[x] = key[i];
-                            pc+2;
+                            pc = pc +2;
                         }
                     }
                 break;
 
                 case 0x0015:
                     delay_timer = V[(opcode & 0x0F00)>>8];
-                    pc+2;
+                    pc = pc +2;
                 break;
 
                 case 0x0018:
                     sound_timer = V[(opcode & 0x0F00)>>8];
-                    pc+2;
+                    pc = pc +2;
                 break;
 
                 case 0x001E:
@@ -379,11 +380,11 @@ void updateDisplay(){
     for(int row = 0;row<=WINDOW_WIDTH;row++){
         for(int column = 0;column<=WINDOW_HEIGHT;column++){
             if(gfx[row,column] == 1){
-                SLD_RenderDrawColor(renderer,255,255,255);
+                SDL_SetRenderDrawColor(renderer,255,255,255,255);
                 SDL_RenderDrawPoint(renderer, row, column);    
             }
             else{
-                SLD_RenderDrawColor(renderer,0,0,0);
+                SDL_SetRenderDrawColor(renderer,0,0,0,255);
                 SDL_RenderDrawPoint(renderer, row, column); 
             }
         }
@@ -392,27 +393,38 @@ void updateDisplay(){
 }
 
 void getUserInput(){
+    SDL_Event event;
 
+    while(SDL_PollEvent( &event)){
+        if(event.type == SDL_QUIT)
+            exit(0);
+        
+        else if(event.type == SDL_KEYUP || event.type == SDL_KEYDOWN){
+            bool state = event.type == SDL_PRESSED;
+
+            keyPressed(event.key.keysym.sym, state);
+        }
+    }
 }
 
-void keyPressed(char c){
+void keyPressed(char c,bool state){
     switch(c){
-        case '1':key[0x1] = 1;break;
-        case '2':key[0x2] = 1;break;
-        case '3':key[0x3] = 1;break;
-        case '4':key[0xC] = 1;break;
-        case 'q':key[0x4] = 1;break;
-        case 'w':key[0x5] = 1;break;
-        case 'e':key[0x6] = 1;break;
-        case 'r':key[0xD] = 1;break;
-        case 'a':key[0x7] = 1;break;
-        case 's':key[0x8] = 1;break;
-        case 'd':key[0x9] = 1;break;
-        case 'f':key[0xE] = 1;break;
-        case 'z':key[0xA] = 1;break;
-        case 'x':key[0x0] = 1;break;
-        case 'c':key[0xB] = 1;break;
-        case 'v':key[0xF] = 1;break;
+        case '1':key[0x1] = state;break;
+        case '2':key[0x2] = state;break;
+        case '3':key[0x3] = state;break;
+        case '4':key[0xC] = state;break;
+        case 'q':key[0x4] = state;break;
+        case 'w':key[0x5] = state;break;
+        case 'e':key[0x6] = state;break;
+        case 'r':key[0xD] = state;break;
+        case 'a':key[0x7] = state;break;
+        case 's':key[0x8] = state;break;
+        case 'd':key[0x9] = state;break;
+        case 'f':key[0xE] = state;break;
+        case 'z':key[0xA] = state;break;
+        case 'x':key[0x0] = state;break;
+        case 'c':key[0xB] = state;break;
+        case 'v':key[0xF] = state;break;
     }
 }
 
