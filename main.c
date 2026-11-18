@@ -276,7 +276,7 @@ void decodeOpcode(){
         case 0xD000:                
             unsigned short z = V[opcode & 0x000F];
 
-            DrawOnDisplay(x,y,z);
+            DrawOnDisplay(x * 10,y* 10,z * 10);
             pc += 2;
         break;
 
@@ -331,10 +331,12 @@ void decodeOpcode(){
 
                 case 0x001E:
                     I += V[(opcode & 0x0F00)>>8];
+                    pc+=2;
                 break;
 
                 case 0x0029:
                     I = V[(opcode & 0x0F00)>>8] * 5; //was autocompleted
+                    pc+=2;
                 break;
 
                 case 0x0033:
@@ -342,18 +344,21 @@ void decodeOpcode(){
                     memory[I] = x/100;
                     memory[I+1] = (x)/10%10;
                     memory[I+2] = x%10;
+                    pc+=2;
                 break;
 
                 case 0x0055:
                     for(int i = 0;i<=x;i++){
                         memory[I+i] = V[i]; 
                     }
+                    pc+=2;
                 break;
 
                 case 0x0065:
                     for(int i = 0;i<=x;i++){
                         V[i] = memory[I+1]; 
                     }
+                    pc+=2;
                 break;
             }
         break;
@@ -367,7 +372,7 @@ void DrawOnDisplay(unsigned short x,unsigned short y,unsigned short z){
         pixel = memory[I + row];
         for(int column = 0;column++;column <= 8){
             if(((pixel & 0x80)>>row) != 0){
-                if(gfx[(x + column + y + row) * 64] == 1){
+                if(gfx[(x + column + y + row) * WINDOW_WIDTH* 10] == 1){
                     V[0xF] = 1;
                 }
             }
@@ -377,8 +382,8 @@ void DrawOnDisplay(unsigned short x,unsigned short y,unsigned short z){
 }
 
 void updateDisplay(){
-    for(int row = 0;row<=WINDOW_WIDTH;row++){
-        for(int column = 0;column<=WINDOW_HEIGHT;column++){
+    for(int row = 0;row<=WINDOW_WIDTH * 10;row++){
+        for(int column = 0;column<=WINDOW_HEIGHT * 10;column++){
             if(gfx[row,column] == 1){
                 SDL_SetRenderDrawColor(renderer,255,255,255,255);
                 SDL_RenderDrawPoint(renderer, row, column);    
@@ -429,7 +434,7 @@ void keyPressed(char c,bool state){
 }
 
 int main(){
-    SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer);
+    SDL_CreateWindowAndRenderer(WINDOW_WIDTH * 10, WINDOW_HEIGHT * 10, 0, &window, &renderer);
     struct timespec start, now;
 
     initialize();
