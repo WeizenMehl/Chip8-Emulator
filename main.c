@@ -261,7 +261,7 @@ void decodeOpcode(){
 
         case 0xA000:
             I = opcode & 0x0FFF;
-            pc =  pc = pc +2;
+            pc = pc +2;
         break;
 
         case 0xB000:
@@ -270,14 +270,14 @@ void decodeOpcode(){
 
         case 0xC000:
             V[x] = rand() & (opcode & 0x00FF);
-            pc = pc  = pc +2;
+            pc = pc +2;
         break;
 
         case 0xD000:                
             unsigned short z = V[opcode & 0x000F];
 
             DrawOnDisplay(x,y,z);
-            pc =pc  = pc +2;
+            pc = pc +2;
         break;
 
         case 0xE000:
