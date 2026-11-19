@@ -27,7 +27,7 @@ unsigned char sound_timer;
 unsigned short stack[16];
 unsigned short sp;
 
-void decodeOpcode(short opcode){
+void decodeOpcode(unsigned short opcode){
     unsigned int x = (opcode & 0x0F00)>>8;
     unsigned int y = (opcode & 0x00F0)>>4;
     printf("PC: 0x%03X | OPCODE: 0x%04X\n", pc, opcode);
@@ -41,7 +41,7 @@ void decodeOpcode(short opcode){
                 break;
                 case 0x000E:
                     sp--;
-                    pc = stack[sp]; //this probably isnt correct
+                    pc = stack[sp];
                     pc+=2;
                 break;
             }

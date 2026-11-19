@@ -1,5 +1,7 @@
-#ifndef FUNCTIONS_H_INCLUDED
-#define FUNCTIONS_H_INCLUDED
+# include <SDL2/SDL.h>
+
+#ifndef DISPLAY_H_INCLUDED
+#define DISPLAY_H_INCLUDED
 
 # define WINDOW_WIDTH 64
 # define WINDOW_HEIGHT 34
@@ -7,9 +9,10 @@
 void updateDisplay();
 void DrawOnDisplay(unsigned short x,unsigned short y,unsigned short z);
 
-#endif
-
 extern unsigned char gfx[WINDOW_WIDTH * WINDOW_HEIGHT];
-extern updateDisplayFlag = false;
+extern bool updateDisplayFlag;
 extern SDL_Renderer *renderer;
 extern SDL_Window *window;
+
+
+#endif

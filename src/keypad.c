@@ -1,6 +1,8 @@
 # include <stdbool.h>
 # include <SDL2/SDL.h> 
 
+# include "keypad.h"
+
 // to represent the Hex-Based Keypad(0x0-0xF)
 unsigned char key[16];
 

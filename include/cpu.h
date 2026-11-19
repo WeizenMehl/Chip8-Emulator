@@ -1,9 +1,7 @@
-#ifndef FUNCTIONS_H_INCLUDED
-#define FUNCTIONS_H_INCLUDED
+#ifndef CPU_H_INCLUDED
+#define CPU_H_INCLUDED
 
-void decodeOpcode(short);
-
-#endif
+void decodeOpcode(unsigned short);
 
 extern unsigned char V[16]; 
 extern unsigned short I;
@@ -12,3 +10,5 @@ extern unsigned char delay_timer;
 extern unsigned char sound_timer;
 extern unsigned short stack[16];
 extern unsigned short sp;
+
+#endif

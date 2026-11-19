@@ -17,12 +17,6 @@
 // to represent the 35 opcodes, each one has 2 Bytes which is how long an unassinged short is
 unsigned short opcode;
 
-// eventho the Chip8 has no interups or hardware registers it
-// has two timer registers that count at 60Hz
-// when set to an value above zero they will count down
-unsigned char delay_timer;
-unsigned char sound_timer;
-
 int loadProgramm(const char *filename);
 
 
@@ -70,7 +64,7 @@ int loadProgramm(const char *filename){
 
 void emulateCycle(){
     opcode = memory[pc] << 8 | memory[pc+1];
-    pc+2;
+    pc+=2;
 
     decodeOpcode(opcode);
 }
