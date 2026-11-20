@@ -139,7 +139,7 @@ void decodeOpcode(unsigned short opcode){
                 break;
 
                 case 0x0006:
-                    V[0xF] = V[x] & 0x0001; // this is probably wrong
+                    V[0xF] = V[x] & 0x0001;
                     V[x] >>=1;
                     pc  +=2;
                 break;
@@ -151,17 +151,17 @@ void decodeOpcode(unsigned short opcode){
                     else{
                         V[0xF] = 1;
                     }
-                    V[x] - V[y];
+                    V[x] = V[y] - V[x];
                     pc  +=2;
                 break;
 
                 case 0x000E:
-                    V[0xF] = V[x] & 0x80;
-                    V[x] <<=1;
+                    V[0xF] = (V[x] >> 7) & 1;
+                    V[x]<<=1;
                     pc  +=2;
                 break;
             }
-
+        break;
         case 0x9000:
             if(V[x] != V[y]){
                 pc +=4;
@@ -186,7 +186,7 @@ void decodeOpcode(unsigned short opcode){
         break;
 
         case 0xD000:                
-            unsigned short z = V[opcode & 0x000F];
+            unsigned short z = opcode & 0x000F;
 
             DrawOnDisplay(V[x],V[y],z);
             pc += 2;
@@ -223,10 +223,11 @@ void decodeOpcode(unsigned short opcode){
                 
                 case 0x000A:
                     //This is wrong and I need to modify this further
-                    for(int i;i<=16;i++){
-                        if(key[i] != false){
-                            V[x] = key[i];
+                    for(int i;i<16;i++){
+                        if(key[i]){
+                            V[x] = i;
                             pc +=2;
+                            break;
                         }
                     }
                 break;
@@ -252,9 +253,9 @@ void decodeOpcode(unsigned short opcode){
                 break;
 
                 case 0x0033:
-                    memory[I] = x/100;
-                    memory[I+1] = (x)/10%10;
-                    memory[I+2] = x%10;
+                    memory[I] = V[x]/100;
+                    memory[I+1] = (V[x])/10%10;
+                    memory[I+2] = V[x]%10;
                     pc+=2;
                 break;
 
