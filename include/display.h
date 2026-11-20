@@ -4,7 +4,7 @@
 #define DISPLAY_H_INCLUDED
 
 # define WINDOW_WIDTH 64
-# define WINDOW_HEIGHT 34
+# define WINDOW_HEIGHT 32
 
 void updateDisplay();
 void DrawOnDisplay(unsigned short x,unsigned short y,unsigned short z);

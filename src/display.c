@@ -7,7 +7,7 @@
 # include "cpu.h"
 
 # define WINDOW_WIDTH 64
-# define WINDOW_HEIGHT 34
+# define WINDOW_HEIGHT 32
 
 // to represent the graphics of the Chip8
 unsigned char gfx[WINDOW_WIDTH * WINDOW_HEIGHT];

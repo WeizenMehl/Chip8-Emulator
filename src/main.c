@@ -11,9 +11,6 @@
 # include "memory.h"
 # include "keypad.h"
 
-# define WINDOW_WIDTH 64
-# define WINDOW_HEIGHT 34 
-
 // to represent the 35 opcodes, each one has 2 Bytes which is how long an unassinged short is
 unsigned short opcode;
 
