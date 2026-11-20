@@ -67,9 +67,27 @@ void emulateCycle(){
 
 int main(){
     SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_AUDIO);
     SDL_CreateWindowAndRenderer(WINDOW_WIDTH * 10, WINDOW_HEIGHT * 10, 0, &window, &renderer);
     SDL_StopTextInput();
     struct timespec start, now;
+
+    SDL_AudioSpec spec;
+    SDL_zero(spec);
+
+    spec.freq = 44100;
+    spec.format = AUDIO_F32SYS;
+    spec.channels = 1;
+    spec.samples = 4096;
+ 
+    SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    SDL_PauseAudioDevice(device, 0); 
+
+    float beep[44100 / 60];
+
+    // I just combied that. I just wanted an beep sound that doesnt destroy my ears
+    for (int i = 0; i < 44100 / 60; i++) 
+        beep[i] = ((i * 440 * 2 / 44100) % 2) ? 0.2f : -0.2f;
 
     initialize();
 
@@ -83,7 +101,13 @@ for(;;){
     }
 
     if(delay_timer > 0) delay_timer--;
-    if(sound_timer > 0) sound_timer--;
+    if (sound_timer > 0) {
+    if (SDL_GetQueuedAudioSize(device) < sizeof(beep) * 2)
+        SDL_QueueAudio(device, beep, sizeof(beep));
+    sound_timer--;
+    } else {
+        SDL_ClearQueuedAudio(device);       
+    }
 
     if(updateDisplayFlag) updateDisplay();
     getUserInput();

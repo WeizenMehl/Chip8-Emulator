@@ -196,7 +196,6 @@ void decodeOpcode(unsigned short opcode){
         break;
 
         case 0xE000:
-            fprintf(stderr, "ROM checks key %X -> %d\n", V[x] & 0xF, key[V[x] & 0xF]);
             switch(opcode & 0x0FF){
                 case 0x009E:
                     if(key[V[x]& 0x0F]){
