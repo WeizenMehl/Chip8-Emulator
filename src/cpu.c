@@ -30,20 +30,26 @@ unsigned short sp;
 void decodeOpcode(unsigned short opcode){
     unsigned int x = (opcode & 0x0F00)>>8;
     unsigned int y = (opcode & 0x00F0)>>4;
-    printf("PC: 0x%03X | OPCODE: 0x%04X\n", pc, opcode);
+    printf("PC: 0x%03X | OPCODE: 0x%04X |X = %u\n", pc, opcode,x);
     switch(opcode & 0xF000){
         case 0x0000:
-            switch(opcode & 0x000F){
+            switch(opcode & 0x00FF){
                 case 0x0000:
+                pc+=2;
+                break;
+
+                case 0x00E0:
                     for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
                     updateDisplayFlag = true;
                     pc  += 2;
                 break;
-                case 0x000E:
+                case 0x00EE:
                     sp--;
                     pc = stack[sp];
                     pc+=2;
                 break;
+
+                
             }
         break;
 
@@ -182,7 +188,7 @@ void decodeOpcode(unsigned short opcode){
         case 0xD000:                
             unsigned short z = V[opcode & 0x000F];
 
-            DrawOnDisplay(x,y,z);
+            DrawOnDisplay(V[x],V[y],z);
             pc += 2;
         break;
 
@@ -241,12 +247,11 @@ void decodeOpcode(unsigned short opcode){
                 break;
 
                 case 0x0029:
-                    I = V[x] * 5; //was autocompleted
+                    I = V[x] * 5;
                     pc+=2;
                 break;
 
                 case 0x0033:
-                    unsigned short x = (opcode & 0x0F00);
                     memory[I] = x/100;
                     memory[I+1] = (x)/10%10;
                     memory[I+2] = x%10;
@@ -262,7 +267,7 @@ void decodeOpcode(unsigned short opcode){
 
                 case 0x0065:
                     for(int i = 0;i<=x;i++){
-                        V[i] = memory[I+1]; 
+                        V[i] = memory[I+i]; 
                     }
                     pc+=2;
                 break;

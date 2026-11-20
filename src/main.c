@@ -64,7 +64,6 @@ int loadProgramm(const char *filename){
 
 void emulateCycle(){
     opcode = memory[pc] << 8 | memory[pc+1];
-    pc+=2;
 
     decodeOpcode(opcode);
 }
@@ -84,7 +83,7 @@ int main(){
 
         double elapsed = (start.tv_nsec - now.tv_nsec)/ 1e9;
 
-        if(elapsed >= 1/500){
+        if(elapsed >= 1/1000){
             emulateCycle();
         }
 
