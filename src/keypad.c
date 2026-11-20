@@ -14,14 +14,14 @@ void getUserInput(){
             exit(0);
         
         else if(event.type == SDL_KEYUP || event.type == SDL_KEYDOWN){
-            bool state = event.type == SDL_PRESSED;
+            bool state = (event.type == SDL_KEYDOWN);
 
             keyPressed(event.key.keysym.sym, state);
         }
     }
 }
 
-void keyPressed(char c,bool state){
+void keyPressed(SDL_KeyCode c,bool state){
     switch(c){
         case '1':key[0x1] = state;break;
         case '2':key[0x2] = state;break;

@@ -28,16 +28,12 @@ unsigned short stack[16];
 unsigned short sp;
 
 void decodeOpcode(unsigned short opcode){
+    unsigned short temp;
     unsigned int x = (opcode & 0x0F00)>>8;
     unsigned int y = (opcode & 0x00F0)>>4;
-    printf("PC: 0x%03X | OPCODE: 0x%04X |X = %u\n", pc, opcode,x);
     switch(opcode & 0xF000){
         case 0x0000:
             switch(opcode & 0x00FF){
-                case 0x0000:
-                pc+=2;
-                break;
-
                 case 0x00E0:
                     for(size_t i = 0; i < sizeof  gfx;i++)  gfx[i] = 0;
                     updateDisplayFlag = true;
@@ -49,7 +45,9 @@ void decodeOpcode(unsigned short opcode){
                     pc+=2;
                 break;
 
-                
+                default:
+                    pc+=2;
+                break;
             }
         break;
 
@@ -118,46 +116,51 @@ void decodeOpcode(unsigned short opcode){
 
                 case 0x0004:
                     if(V[y] > (0xFF - V[x])){
-                        V[0xF] = 1;
+                         temp = 1;
                     }
                     else{
-                        V[0xF] = 0;
+                        temp = 0;
                     }
                     V[x] += V[y];
+                    V[0xF] = temp;
                     pc += 2;          
                 break;
 
                 case 0x0005:
                     if(V[y] > V[x]){
-                        V[0xF] = 0;
+                        temp = 0;
                     }
                     else{
-                        V[0xF] = 1;
+                        temp = 1;
                     }
                     V[x] -= V[y];
+                    V[0xF] = temp;
                     pc  +=2;
                 break;
 
                 case 0x0006:
-                    V[0xF] = V[x] & 0x0001;
+                    temp = V[x] & 0x0001;
                     V[x] >>=1;
+                    V[0xF] = temp;
                     pc  +=2;
                 break;
 
                 case 0x0007:
                     if(V[x] > V[y]){
-                        V[0xF] = 0;
+                        temp = 0;
                     }
                     else{
-                        V[0xF] = 1;
+                        temp = 1;
                     }
                     V[x] = V[y] - V[x];
+                    V[0xF] = temp;
                     pc  +=2;
                 break;
 
                 case 0x000E:
-                    V[0xF] = (V[x] >> 7) & 1;
+                    temp = (V[x] >> 7) & 1;
                     V[x]<<=1;
+                    V[0xF] = temp;
                     pc  +=2;
                 break;
             }
@@ -193,9 +196,10 @@ void decodeOpcode(unsigned short opcode){
         break;
 
         case 0xE000:
-            switch(opcode & 0x00F){
-                case 0x000E:
-                    if(key[V[(opcode & 0x0F00)>>8]] != false){
+            fprintf(stderr, "ROM checks key %X -> %d\n", V[x] & 0xF, key[V[x] & 0xF]);
+            switch(opcode & 0x0FF){
+                case 0x009E:
+                    if(key[V[x]& 0x0F]){
                         pc += 4;
                     }
                     else{
@@ -203,8 +207,8 @@ void decodeOpcode(unsigned short opcode){
                     }
                 break;
 
-                case 0x0001:
-                    if(key[V[(opcode & 0x0F00)>>8]] == false){
+                case 0x00A1:
+                    if(!key[V[x] & 0x0F]){
                         pc  +=4;
                     }
                     else{
@@ -222,8 +226,7 @@ void decodeOpcode(unsigned short opcode){
                 break;
                 
                 case 0x000A:
-                    //This is wrong and I need to modify this further
-                    for(int i;i<16;i++){
+                    for(int i = 0;i<16;i++){
                         if(key[i]){
                             V[x] = i;
                             pc +=2;

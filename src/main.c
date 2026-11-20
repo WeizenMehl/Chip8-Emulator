@@ -66,34 +66,36 @@ void emulateCycle(){
 }
 
 int main(){
+    SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(WINDOW_WIDTH * 10, WINDOW_HEIGHT * 10, 0, &window, &renderer);
+    SDL_StopTextInput();
     struct timespec start, now;
 
     initialize();
 
     loadProgramm("TETRIS");
 
-    clock_gettime(CLOCK_MONOTONIC,&start);
+for(;;){
+    clock_gettime(CLOCK_MONOTONIC, &start);
 
-    for(;;){
-        clock_gettime(CLOCK_MONOTONIC,&now);
-
-        double elapsed = (start.tv_nsec - now.tv_nsec)/ 1e9;
-
-        if(elapsed >= 1/1000){
-            emulateCycle();
-        }
-
-        if(delay_timer > 0 && elapsed >= 1/60) delay_timer--;
-        if(sound_timer > 0 && elapsed >= 1/60){
-            // gonna need to implement beep
-            sound_timer--;
-        }
-
-        if(updateDisplayFlag){ updateDisplay();}
-
-        getUserInput();
+    for(int i = 0; i < 10; i++){
+        emulateCycle();
     }
+
+    if(delay_timer > 0) delay_timer--;
+    if(sound_timer > 0) sound_timer--;
+
+    if(updateDisplayFlag) updateDisplay();
+    getUserInput();
+
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    double elapsed = (now.tv_sec - start.tv_sec)
+                   + (now.tv_nsec - start.tv_nsec) / 1e9;
+    double remaining = 1.0/60.0 - elapsed;
+    if(remaining > 0){
+        SDL_Delay((Uint32)(remaining * 1000.0));
+    }
+}
 
     return 0;
 }

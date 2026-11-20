@@ -2,7 +2,7 @@
 #define KEYPAD_H_INCLUDED
 
 void getUserInput();
-void keyPressed(char c,bool state);
+void keyPressed(SDL_KeyCode c,bool state);
 extern unsigned char key[16];
 
 #endif
